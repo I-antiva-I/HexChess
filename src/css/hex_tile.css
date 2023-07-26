@@ -26,6 +26,10 @@
 
     font-size: 1rem;
     color: white;
+
+    /* ? */
+    border-radius: 8PX;
+
 }
 
 .hex-tile.state-default.color-1
@@ -99,6 +103,27 @@
     z-index: 1;
 }
 */
+
+    /*
+    background: 
+    conic-gradient(
+        red 0deg,
+        red 30deg,
+        blue 31deg,
+        blue 90deg,
+        green 91deg,
+        green 150deg,
+        purple 151deg,
+        purple 210deg,
+        hotpink 211deg,
+        hotpink 270deg,
+        gold 271deg,
+        gold 330deg,
+        red 331deg
+    );
+    */
+
+
 
 .App
 {

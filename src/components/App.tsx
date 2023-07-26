@@ -9,17 +9,26 @@ import './../css/App.css';
 import logo from './../images/logo.svg';
 
 
+import { Team } from '../game/enums';
 
 function App() {
   
-  let [gameState, setGameState] = useState({gameField: new GameField(5)});
-  //console.log("???" ,gameState["gameField"].getTile(-435,-51))
+  let [gameState, setGameState] = useState({
+    gameField: new GameField(5),
+    previousCoors:  [-99,99],
+  });
+
   let callback = (coorR: number, coorC: number) =>
     {
-      console.log("App says: ", coorR, coorC)
-      console.log("App says: ", coorR, coorC)
-
-      setGameState({gameField:  gameState["gameField"].highlightTiles([coorR, coorC]) });
+      console.log("App recieved coordinates: ", coorR, coorC);
+      gameState.gameField.processClick([coorR, coorC], gameState.previousCoors);
+      
+      setGameState(
+        {
+          gameField : gameState.gameField,
+          previousCoors: [coorR, coorC]
+        }
+      )
     }
 
   return (
