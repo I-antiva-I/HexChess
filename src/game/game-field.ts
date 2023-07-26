@@ -28,7 +28,10 @@ export class GameField
         this.colSize =  radius*2+1;
         
         // Offset for placing into "Table"
-        let offset =        radius;
+        let offset = radius;
+
+        // Color group of tile
+        let colorGroup = 0;
 
         // Creation of GameTiles
         this.tiles = new Array<Array<GameTile>>(this.rowSize);
@@ -44,19 +47,33 @@ export class GameField
                     // Condition for valid coordinates
                     if ((c+r+s) === 0)
                     {
-                        this.tiles[r+offset][c+offset] = new GameTile(r,c,s);
+                        this.tiles[r+offset][c+offset] = new GameTile(r,c,s, (colorGroup%3)+1);
                     }
+                   
                 }
+                colorGroup++;
             }
         }
         
-        // Assign color to tiles
-        this.colorizeTiles();
-        // Place figures on tiles
+        // Preparations
+        // this.colorizeTiles();
         this.placeFigures();
     }
 
-    //
+
+    // Get Tile via coordinates
+    getTile(coorR:number, coorC:number) : GameTile | undefined
+    {
+        // Coordinate + Radius(Offset) = Position of tile in table
+        try {return this.tiles[coorR+this.radius][coorC+this.radius];}
+        catch (exception: any)
+        {
+            return undefined;
+        }
+    }
+
+
+    // Place figures on tiles
     placeFigures()
     {
         // C 5-5
@@ -127,23 +144,6 @@ export class GameField
 
     }
 
-    //
-    colorizeTiles()
-    {
-        let color = 0;
-        for(let row:number = 0; row < this.rowSize; row++)
-        {
-            for(let col:number = 0; col < this.colSize; col++)
-            {  
-                if(this.tiles[row][col] !== undefined) 
-                    {this.tiles[row][col].tileColor = (color%3)+1;};
-                color++;
-            }
-        }
-    }
-
-
-    //   
     // Basically, rotate "table" on 45 degrees
     getColumns() 
     {
@@ -175,101 +175,107 @@ export class GameField
             allColumns.push(oneColumn);
             iteration++;
         }
-
+        
         return allColumns;
     }
 
-    // Move
-    highlightTiles(origin: Array<number>)
+    processClick(current: Array<number>, previous: Array<number>)
     {
         // Origin Tile 
-        let originR=        origin[0];
-        let originC=        origin[1];
-        let originTile =    this.getTile(originR,originC);
+        let currentTile =    this.getTile(current[0],current[1]);
+        let previousTile =    this.getTile(previous[0],previous[1]);
 
-        if (originTile !== undefined)
+        if(currentTile !== undefined)
         {
-            if (originTile.isOccuppied())
+            switch(currentTile?.tileState)
             {
-                let movementVectors = originTile.tileFigure?.movementVectors;
-
-                for(let vector of movementVectors || [])
-                {
-                    console.log("VECTOR", vector);
-                    let iteration=0;
-         
-                    while(true)
+                case TileState.STATE_DEFAULT:
+                    if (currentTile.isOccuppied())
                     {
-                        let tile = this.getTile(originR+vector[0]*(iteration+1),originC+vector[1]*(iteration+1));
-                        if (tile === undefined) {break;}
-                        else
+                        this.allTilesToDefault();
+                        this.showPossibleMoves(currentTile);
+                    }
+                    else
+                    {
+                        this.allTilesToDefault();
+                    }
+                    break;
+                case TileState.STATE_HIGHLIGHTED:
+                    if (previousTile !== undefined)
+                    {
+                        this.repositionFigure(previousTile, currentTile);
+                        this.allTilesToDefault();
+                    }
+                    break;
+                default:
+                    this.allTilesToDefault();
+            }
+        }
+    }
+
+    repositionFigure(origin: GameTile, endpoint: GameTile)
+    {
+        endpoint.tileFigure = origin.tileFigure;
+        origin.tileFigure = undefined;
+    }
+
+    allTilesToDefault()
+    {
+        for (let row =0 ; row<this.rowSize; row++)
+        {
+            for (let col =0 ; col<this.colSize; col++)
+            {
+                if (this.tiles[row][col] !== undefined)
+                {
+                    this.tiles[row][col].tileState = TileState.STATE_DEFAULT;
+                }
+            }
+        }
+    }
+
+    // Move
+    showPossibleMoves(origin: GameTile)
+    {
+        if (origin.isOccuppied())
+        {
+            // All possible movement directions
+            let movementVectors = origin.tileFigure?.movementVectors || [];
+
+            for(let vector of movementVectors)
+            {
+                let iteration=0;
+     
+                while(true)
+                {
+                    // Tile that should be checked
+                    let tile = this.getTile(origin.coorR+vector.deltaR*(iteration+1), origin.coorC+vector.detlaC*(iteration+1));
+
+                    if (tile === undefined) {break;}
+                    else if ((vector.maxDistance) && (iteration>=vector.maxDistance)) {break;}
+                    else
+                    {
+                        if(!tile.isOccuppied())
                         {
-                            if(!tile.isOccuppied())
-                            {
-                                tile.tileState=TileState.STATE_HIGHLIGHTED;
-                            }
-                            else
-                            {
-                                break;
-                            }
+                            tile.tileState=TileState.STATE_HIGHLIGHTED;
                         }
-                        iteration++;
-  
+                        else
+                        {  
+                            //console.log("TEAM", tile.tileFigure?.team )
+                            if (origin.tileFigure?.team !== undefined)
+                            {
+                                if(tile.isOccuppiedByEnemy(origin.tileFigure?.team))
+                                {
+                                    tile.tileState=TileState.STATE_HIGHLIGHTED;
+                                }
+                            }
+
+                            break;
+                        }
                     }
-                }
-
-            }
-        }
-        
-        return this;
-
-     /*
-        if (originTile.isOccuppied()) 
-        {
-
-
-            if (movementVectors !== undefined)
-            {
-                for(let vector of movementVectors)
-                {
-                    let iteration=1;
-                    let tile = this.getTile(originR+vector[0]*iteration,originC+vector[1]*iteration)
-                    while(tile !== undefined )
-                    {
-                        tile.tileState=TileState.STATE_HIGHLIGHTED;
-                        iteration++;
-
-                    }
+                    iteration++;
                 }
             }
-
-
-        }
-        */
-
-    }
-
-    getTile(coorR:number, coorC:number) : GameTile | undefined
-    {
-        // Coordinate + Radius(Offset) = Position of tile in table
-        try {return this.tiles[coorR+this.radius][coorC+this.radius];}
-        catch (exception: any)
-        {
-            //console.log("Something went wrong:", exception);
-            //console.log("Tile ["+(coorR+5)+" "+(coorC+5)+"] is inaccessable");
-            
-            return undefined;
         }
     }
-
-    isCoordinatesValid(coorR: number, coorC: number)
-    {
-        //if (coorC)
-    }
-
-
-
-
-
 }
 
