@@ -1,6 +1,6 @@
 
 import {GameFigure} from "./figures/game-figure";
-import { TileState } from "./enums";
+import { TileState, Team } from "./enums";
 
 export class GameTile
 {
@@ -19,15 +19,15 @@ export class GameTile
 
     // Class Functions ---------------------------------------------
     // Constructor
-    constructor(r:number, c:number, s:number)
+    constructor(r:number, c:number, s:number, color: number = 0,)
     {
         this.coorR = r;
         this.coorC = c;
         this.coorS = s;
 
-        this.tileColor =    1;
-        this.tileFigure =   undefined;
+        this.tileColor =    color;
         this.tileState =    TileState.STATE_DEFAULT;
+        this.tileFigure =   undefined;
     }
 
     //
@@ -37,15 +37,29 @@ export class GameTile
     }
 
     //
-    isOccuppiedByEnemy():boolean
+    isOccuppiedByEnemy(team: Team):boolean
     {
-        return true;
+        if (this.isOccuppied())
+        {
+            if (this.tileFigure?.team != team)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     //
-    isOccuppiedByPlayer():boolean
+    isOccuppiedByAlly(team: Team):boolean
     {
-        return true;
+        if (this.isOccuppied())
+        {
+            if (this.tileFigure?.team == team)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
