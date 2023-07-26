@@ -1,17 +1,18 @@
 
 import {FigureType, Team} from "./../enums";
+import { MovementVector } from "../movement-vector";
 
 export abstract class GameFigure
 {             
     team:               Team;          
     figureType:         FigureType;
-    movementVectors:    Array<Array<number>> | undefined;
+    movementVectors:    Array<MovementVector>;
 
     constructor(team:Team, figureType: FigureType)
     {
         this.team = team;
         this.figureType = figureType;
-        this.movementVectors = [[1,0],[-1,0],[0,-1],[0,1]];
+        this.movementVectors = new Array<MovementVector>;
     }
 
     greeting()

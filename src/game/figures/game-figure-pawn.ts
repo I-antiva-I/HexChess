@@ -1,6 +1,7 @@
 
 import {GameFigure} from "./game-figure";
 import {FigureType, Team} from "./../enums";
+import { MovementVector } from "../movement-vector";
 
 export class GameFigurePawn extends GameFigure
 {             
@@ -9,13 +10,20 @@ export class GameFigurePawn extends GameFigure
     {
         super(team , FigureType.PAWN);
         
+
+        // BLACK [[+1,0],[0,-1],[+1,-1]];
+        // WHITE [[-1,0],[0,+1],[-1,+1]];
         if (team === Team.BLACK)
         {
-            this.movementVectors = [[+1,0],[0,-1],[+1,-1]];
+            this.movementVectors.push(new MovementVector(+1, 0,1));
+            this.movementVectors.push(new MovementVector( 0,-1,1));
+            this.movementVectors.push(new MovementVector(+1,-1,1,false));
         }
         else
         {
-            this.movementVectors = [[-1,0],[0,+1],[-1,+1]];
+            this.movementVectors.push(new MovementVector(-1, 0,1));
+            this.movementVectors.push(new MovementVector( 0,+1,1));
+            this.movementVectors.push(new MovementVector(-1,+1,1,false));
         }
 
     }

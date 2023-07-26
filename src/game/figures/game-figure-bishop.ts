@@ -1,5 +1,6 @@
 import {GameFigure} from "./game-figure";
 import {FigureType, Team} from "../enums";
+import { MovementVector } from "../movement-vector";
 
 export class GameFigureBishop extends GameFigure
 {             
@@ -8,7 +9,13 @@ export class GameFigureBishop extends GameFigure
     {
         super(team , FigureType.BISHOP);
 
-        this.movementVectors = [[+1,+1],[-1,-1],[-2,+1],[+2,-1],[+1,-2],[-1,+2]];
+        // Movement of Bishop
+        this.movementVectors.push(new MovementVector(+1,+1));
+        this.movementVectors.push(new MovementVector(-1,-1));
+        this.movementVectors.push(new MovementVector(-2,+1));
+        this.movementVectors.push(new MovementVector(+2,-1));
+        this.movementVectors.push(new MovementVector(+1,-2));
+        this.movementVectors.push(new MovementVector(-1,+2));
     }
 
     greeting()
